@@ -34,17 +34,26 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "localhost:50052", "the address to connect to")
+	loops = flag.Int("loops", 10, "loops")
+	addr  = flag.String("addr", "localhost:50052", "the address to connect to")
 	// see https://github.com/grpc/grpc/blob/master/doc/service_config.md to know more about service config
 	retryPolicy = `{
+		"loadBalancingConfig": [{"round_robin":{}}],
+  		"timeout": "10.000000001s",
 		"methodConfig": [{
 		  "name": [{"service": "grpc.examples.echo.Echo"}],
 		  "retryPolicy": {
-			  "MaxAttempts": 4,
+			  "MaxAttempts": 1,
 			  "InitialBackoff": ".01s",
-			  "MaxBackoff": ".01s",
-			  "BackoffMultiplier": 1.0,
-			  "RetryableStatusCodes": [ "UNAVAILABLE" ]
+			  "MaxBackoff": "3s",
+			  "BackoffMultiplier": 2.0,
+			  "RetryableStatusCodes": [
+				"DEADLINE_EXCEEDED",
+				"RESOURCE_EXHAUSTED",
+				"INTERNAL",
+				"UNAVAILABLE",
+				"DATA_LOSS"
+			  ]
 		  }
 		}]}`
 )
@@ -66,14 +75,16 @@ func main() {
 		}
 	}()
 
-	c := pb.NewEchoClient(conn)
+	for i := 0; i < *loops; i++ {
+		c := pb.NewEchoClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
 
-	reply, err := c.UnaryEcho(ctx, &pb.EchoRequest{Message: "Try and Success"})
-	if err != nil {
-		log.Fatalf("UnaryEcho error: %v", err)
+		reply, err := c.UnaryEcho(ctx, &pb.EchoRequest{Message: "Try and Success"})
+		if err != nil {
+			log.Printf("UnaryEcho error: %v", err)
+		}
+		log.Printf("UnaryEcho reply: %v", reply)
 	}
-	log.Printf("UnaryEcho reply: %v", reply)
 }
