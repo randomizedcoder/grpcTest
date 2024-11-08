@@ -69,3 +69,11 @@ failcodes =  10,12,14, so the server will randomly return one of the codes 10, 1
 2024/11/07 19:54:10 i:4 UnaryEcho error: rpc error: code = Aborted desc = intercept failure code:10 rp:60 fail:65
 2024/11/07 19:54:10 i:4 UnaryEcho reply: <nil>
 ```
+
+## Important code
+
+unaryServerInterceptor
+https://github.com/randomizedcoder/grpcTest/blob/main/cmd/server/server.go#L83
+
+unaryClientInterceptor
+https://github.com/randomizedcoder/grpcTest/blob/main/cmd/client/client.go#L98
