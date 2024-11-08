@@ -1,0 +1,20 @@
+{
+	"loadBalancingConfig": [{"round_robin":{}}],
+	"timeout": "10.000000001s",
+	"methodConfig": [{
+		"name": [{"service": "grpc.examples.echo.Echo"}],
+		"retryPolicy": {
+			"MaxAttempts": 1,
+			"InitialBackoff": ".01s",
+			"MaxBackoff": "3s",
+			"BackoffMultiplier": 2.0,
+			"RetryableStatusCodes": [
+        "DEADLINE_EXCEEDED",
+        "RESOURCE_EXHAUSTED",
+        "INTERNAL",
+        "UNAVAILABLE",
+        "DATA_LOSS"
+			]
+		}
+	}]
+}
